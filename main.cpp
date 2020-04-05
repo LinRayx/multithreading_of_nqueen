@@ -46,18 +46,18 @@ int main() {
     using namespace std::chrono;
     auto start = system_clock::now();
  
-    ThreadPool *threadPool = new ThreadPool(5);
+    ThreadPool *threadPool = new ThreadPool(8);
     
+    std::vector< std::future<int> > res_v;
+    for(int i = 0; i < n; ++i) {
+        std::function<int(int ,int ,int ,int)> func = dfs;
+        auto res = threadPool->enqueue(func, 1,(1<<i), (1<<i), (1<<(n-1+i)));
+        res_v.emplace_back(std::move(res));
+    }
     
-       
-        
-        for(int i = 0; i < n; ++i) {
-            std::function<int(int ,int ,int ,int)> func = dfs;
-            cnt += threadPool->enqueue(func, 1,(1<<i), (1<<i), (1<<(n-1+i))).get();
-
-        }
-
-    
+    for(int i = 0; i < res_v.size(); i++) {
+        cnt += res_v[i].get();
+    }
     std::cout << cnt << std::endl;
     auto end   = system_clock::now();
     auto duration = duration_cast<microseconds>(end - start);
